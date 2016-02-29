@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <stdlib.h>
+int gl_count = 0;
+void mergeSort(int arr[], int start, int end);
+void merge(int arr[], int start, int middle, int end);
+
+void merge(int arr[], int start, int middle, int end){
+    int i, j, k, length1, length2;
+    int *pl, *pr;
+    length1 = middle - start + 1;
+    length2 = end - middle;
+    pl = (int *)malloc(length1 * sizeof(int));      //mergeSort 的缺点就在于需要多余的内存
+    pr = (int *)malloc(length2 * sizeof(int));      //分别代表前后部分的内存
+    for(i = 0; i < length1; i++){
+        pl[i] = arr[start + i];
+    }
+    for(i = 0; i < length2; i++){
+        pr[i] = arr[middle + 1 + i];                //往分配的内存中存放序列值
+    }
+    
+    i = 0;
+    j = 0;
+    k = start;
+    while(i < length1 && j < length2){              //往原来的数组里写值
+        if(pl[i] < pr[j]){
+            arr[k++] = pl[i++];
+        } else {
+            arr[k++] = pr[j++];
+            gl_count += length1 - i;
+            }
+    }
+    while(i < length1){
+        arr[k++] = pl[i++];
+    }
+    while(j < length2){
+        arr[k++] = pr[j++];
+    }
+}
+
+//use recursive to implement mergeSort, merge two ordered subsequence into one sequence
+void mergeSort(int arr[], int start, int end){
+    int middle;
+    if(start < end){
+        middle = (end + start) / 2;
+        mergeSort(arr, start, middle);
+        mergeSort(arr, middle + 1, end);
+        merge(arr, start, middle, end);
+    }
+}
+
+int main(){
+    int N, j;
+    scanf("%d", &N);
+    int arr[N];
+    for(j = 0; j < N; j++){
+        scanf("%d", &arr[j]);            //input an array
+    }
+    printf("\nsorted array: "); 
+    
+    mergeSort(arr, 0, N - 1);            //merge sort
+    for(j = 0; j < N; j++){
+        printf("%3d",arr[j]);
+        }
+    printf("%d", gl_count);
+    return 0;
+}
