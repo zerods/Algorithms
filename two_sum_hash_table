@@ -1,0 +1,17 @@
+#! /usr/bin/env python
+#Filename:twoSum
+
+def twoSum(nums, target):
+    """
+    Given an array of integers, return indices of the two numbers such that they add up to a specific target
+    :type nums: List[int]
+    :type target: int
+    :rtype: List[int]
+    """
+    dic={}
+    for index, num in enumerate(nums):
+        if dic.has_key(num):
+            return [dic[num], index]
+        else:
+            dic[target-num] = index
+    return [0,0]
