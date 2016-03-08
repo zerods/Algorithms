@@ -24,9 +24,9 @@ void indexEqualVal(int *a, int aSize){
             isExist = 1;
             break;
         } else if (a[middle] < middle){
-            left = middle;
+            left = middle + 1;
         } else {
-            right = middle;
+            right = middle - 1;
         }
         middle = (left + right) / 2;
     }
