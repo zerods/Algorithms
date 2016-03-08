@@ -1,0 +1,39 @@
+//data_structure_2 binary search 
+//Give an efficient algorithm to determine if there exists an integer i 
+//such that ai= i in an array of integers a1< a2< a3< . . . < an. 
+
+#include <stdio.h>
+#include <stdlib.h>
+
+void indexEqualVal(int *a, int aSize);
+
+int main(int argc, char *argv[]){
+    int a[5] = {0, 5, 7, 8, 9, 11};
+    indexEqualVal(a, 6);
+    return 0;
+}
+
+void indexEqualVal(int *a, int aSize){
+    int middle, left, right;
+    left = 0;
+    right = aSize - 1;
+    middle = (left + right) / 2;
+    int isExist = 0;
+    while ( left < right){
+        if (a[middle] == middle){
+            isExist = 1;
+            break;
+        } else if (a[middle] < middle){
+            left = middle;
+        } else {
+            right = middle;
+        }
+        middle = (left + right) / 2;
+    }
+    if (isExist){
+        printf("Exist!\n");
+    } else {
+        printf("Do not Exist!\n");
+    }
+}
+
