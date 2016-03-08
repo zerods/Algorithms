@@ -1,0 +1,31 @@
+//2th chapter 2.13
+//isPrime program
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+int main()
+{
+    int N,i;
+    int isPrime = 1;
+    scanf("%d", &N);
+    if (N == 2){
+        printf("N is a prime number.\n"); 
+    } else if (N % 2 == 0){
+        printf("N is not a prime number.\n");
+    } else {
+        for( i=3; i<sqrt(N); i+=2 ){
+            if (N % i == 0){
+                isPrime = 0;
+                break;
+            }
+        }
+        if (isPrime){
+            printf("N is a prime number.\n");
+        } else {
+        printf("N is not a prime number.\n");
+        }
+    }
+    return 0;
+}
