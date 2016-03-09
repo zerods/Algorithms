@@ -8,8 +8,8 @@
 void indexEqualVal(int *a, int aSize);
 
 int main(int argc, char *argv[]){
-    int a[5] = {0, 5, 7, 8, 9, 11};
-    indexEqualVal(a, 6);
+    int a[8] = {-2, -1, 0, 3, 2, 4, 5, 6};
+    indexEqualVal(a, 8);
     return 0;
 }
 
@@ -19,7 +19,7 @@ void indexEqualVal(int *a, int aSize){
     right = aSize - 1;
     middle = (left + right) / 2;
     int isExist = 0;
-    while ( left < right){
+    while ( left <= right){
         if (a[middle] == middle){
             isExist = 1;
             break;
@@ -36,4 +36,3 @@ void indexEqualVal(int *a, int aSize){
         printf("Do not Exist!\n");
     }
 }
-
