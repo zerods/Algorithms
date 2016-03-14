@@ -1,2 +1,2 @@
-# Algorithms
-This repository is designed for leaning data structure and algorithms
+# linked list
+This repository is about linked list
