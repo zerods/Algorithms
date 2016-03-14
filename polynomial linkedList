@@ -1,0 +1,176 @@
+//polynomial plus and multiply
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct node *ptrToNode;
+typedef ptrToNode polynomial;
+polynomial readPoly();
+polynomial add(ptrToNode p1, ptrToNode p2);
+polynomial mult(ptrToNode p1, ptrToNode p2);
+void printPoly(polynomial p);
+void Attach( int c, int e, polynomial *parrow3 );
+
+struct node {
+    int coefficient;
+    int exponent;
+    ptrToNode next;
+};
+
+int main(int argc, char*argv[]) {
+   polynomial p1, p2, mulP, addP;
+   p1 = readPoly();
+   p2 = readPoly();
+   mulP = mult(p1, p2);
+   printPoly(mulP);
+   addP = add(p1, p2);
+   printPoly(addP);
+   return 0;
+}
+polynomial readPoly() {
+    int c, e, n;
+    polynomial ansP;
+    ptrToNode arrow, temp;
+
+    scanf("%d",&n);
+    ansP = (polynomial)malloc(sizeof(struct node));
+    ansP->next = NULL;
+    arrow = ansP;
+    while(n--) {
+        scanf("%d %d", &c,&e);
+        Attach(c, e, &arrow);
+    }
+    //printf("%d %d %d %d %d", ansP->coefficient, ansP->next->coefficient, ansP->next->next->coefficient, ansP->next->next->next->coefficient, ansP->next->next->next->next);
+    temp = ansP;
+    ansP = ansP->next;
+    free(temp);
+    return ansP;
+}
+
+//add a new node
+void Attach( int c, int e, polynomial *pRear ){
+    polynomial P;
+    P = (polynomial)malloc(sizeof(struct node));
+    P->coefficient = c; 
+    P->exponent = e;
+    P->next = NULL;
+    (*pRear)->next = P;
+    *pRear = P;
+}
+polynomial add(ptrToNode P1, ptrToNode P2) {
+    polynomial ansP;
+    ptrToNode arrow1, arrow2, arrow3, temp;
+    int c, e;
+    arrow1 = P1;
+    arrow2 = P2;
+    ansP = (polynomial)malloc(sizeof(struct node));
+    ansP->next = NULL;
+    arrow3 = ansP;
+
+    while (arrow1 && arrow2) {
+        if (arrow1->exponent == arrow2->exponent){
+            if (arrow1->coefficient + arrow2->coefficient) {
+            e = arrow1->exponent;
+            c = arrow1->coefficient + arrow2->coefficient;
+            Attach( c, e, &arrow3 );
+            //printf("%d %d ",  arrow3->coefficient, arrow3->exponent);
+            }
+            arrow1 = arrow1->next;
+            arrow2 = arrow2->next;
+        } else if (arrow1->exponent > arrow2->exponent) {
+            e = arrow1->exponent;
+            c = arrow1->coefficient;
+            Attach( c, e, &arrow3 );
+            //printf("%d %d ",  arrow3->coefficient, arrow3->exponent);
+            arrow1 = arrow1->next;
+        } else {
+            e = arrow2->exponent;
+            c = arrow2->coefficient;
+            Attach( c, e, &arrow3 );
+            //printf("%d %d ",  arrow3->coefficient, arrow3->exponent);
+            arrow2 = arrow2->next;
+        }
+    }
+    while (arrow1) {
+        e = arrow1->exponent;
+        c = arrow1->coefficient;
+        Attach( c, e, &arrow3 );
+        //printf("%d %d ",  arrow3->coefficient, arrow3->exponent);
+        arrow1 = arrow1->next;
+    }
+    while (arrow2) {
+        e = arrow2->exponent;
+        c = arrow2->coefficient;
+        Attach( c, e, &arrow3 );
+        //printf("%d %d ",  arrow3->coefficient, arrow3->exponent);
+        arrow2 = arrow2->next;
+    }
+    temp = ansP;
+    ansP = ansP->next;
+    free(temp);
+
+    return ansP;
+}
+polynomial mult(ptrToNode P1, ptrToNode P2) {
+    polynomial ansP;
+    ptrToNode arrow1, arrow2, arrow3, temp;
+    int c, e;
+    if (!P1 || !P2) return NULL;
+    arrow1 = P1;
+    arrow2 = P2;
+    ansP = (polynomial)malloc(sizeof(struct node));
+    ansP->next = NULL;
+    arrow3 = ansP;
+    while (arrow2) { 
+        Attach(arrow1->coefficient*arrow2->coefficient, arrow1->exponent+arrow2->exponent, &arrow3);
+        arrow2 = arrow2->next;
+    }
+        arrow1 = arrow1->next;
+    while (arrow1) {
+        arrow2 = P2;
+        arrow3 = ansP;
+        while (arrow2) {
+            e = arrow1->exponent + arrow2->exponent;
+            c = arrow1->coefficient * arrow2->coefficient;
+            while (arrow3->next && arrow3->next->exponent > e)
+                arrow3 = arrow3->next;
+            if (arrow3->next && arrow3->next->exponent == e) {
+                if (arrow3->next->coefficient + c) {
+                    arrow3->next->coefficient += c;
+                } else {
+                    temp = arrow3->next;
+                    arrow3->next = temp->next;
+                    free(temp);
+                }
+            } else {
+                temp = (polynomial)malloc(sizeof(struct node));
+                temp->coefficient = c; temp->exponent = e;
+                temp->next = arrow3->next;
+                arrow3->next = temp; arrow3 = arrow3->next;
+            }
+            arrow2 = arrow2->next;
+    }
+    arrow1 = arrow1->next;
+    }
+    arrow2 = ansP;
+    ansP = ansP->next;
+    free(arrow2);
+    return ansP;
+}
+
+void printPoly(polynomial p) {
+    int flag = 0;
+    if (!p) {
+        printf("0 0\n");
+        return;
+    }
+    while ( p ) {
+        if (!flag)
+            flag = 1;
+        else
+            printf(" ");
+        printf("%d %d", p->coefficient, p->exponent);
+        p = p->next;
+    }
+    printf("\n");
+}
