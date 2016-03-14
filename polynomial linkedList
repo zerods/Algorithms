@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 typedef struct node *ptrToNode;
 typedef ptrToNode polynomial;
 polynomial readPoly();
@@ -17,6 +16,7 @@ struct node {
     ptrToNode next;
 };
 
+//here the main function uses other functions defined in the file
 int main(int argc, char*argv[]) {
    polynomial p1, p2, mulP, addP;
    p1 = readPoly();
@@ -27,6 +27,8 @@ int main(int argc, char*argv[]) {
    printPoly(addP);
    return 0;
 }
+
+//read the input and return polynomial
 polynomial readPoly() {
     int c, e, n;
     polynomial ansP;
@@ -57,6 +59,7 @@ void Attach( int c, int e, polynomial *pRear ){
     (*pRear)->next = P;
     *pRear = P;
 }
+
 polynomial add(ptrToNode P1, ptrToNode P2) {
     polynomial ansP;
     ptrToNode arrow1, arrow2, arrow3, temp;
