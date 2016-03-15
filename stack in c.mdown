@@ -1,5 +1,7 @@
 ###stack implementation
+//参考data structue and analysis in c
 ```
+//linked list stack
 #include <stdio.h>
 #include <stdlib.h>
 struct node;
@@ -94,3 +96,99 @@ void pop(stack s) {
     }
 }
 ```
+```
+//array stack implementation
+#include <stdio.h>
+#include <stdlib.h>
+
+struct stackRecord;
+typedef struct stackRecord*stack;
+typedef int elementType;
+
+int isEmpty(stack s);
+int isFull(stack s);
+stack createStack(int maxElements);
+void disposeStack(stack s);
+void makeEmpty(stack s);
+void push(elementType x, stack s);
+elementType top(stack s);
+void pop(stack s);
+elementType topAndpop(stack s);
+#define emptyTos -1
+#define minStackSize 5
+
+struct stackRecord{
+   int capacity;
+   int topOfstack;
+   elementType *array;
+};
+
+int main(){
+    return 0;
+}
+
+stack createStack(int maxElements) {
+    stack s;
+
+    if (maxElements < minStackSize) {
+        printf("stack size is too small!\n");
+        return NULL;
+    }
+    s = (stack)malloc(sizeof(struct stackRecord));
+    if (s == NULL) {
+        printf("out of space!\n");
+        return NULL;
+    }
+    s->array = malloc(sizeof(elementType)*maxElements);
+    s->capacity = maxElements;
+    s->topOfstack = -1;
+
+    return s;
+}
+void disposeStack(stack s) {
+    if (s != NULL) {
+        free(s->array);
+        free(s);
+    }
+}
+int isEmpty(stack s) {
+    return s->topOfstack == emptyTos;
+}
+int isFull(stack s){
+    return s->topOfstack == s->capacity - 1;
+}
+void makeEmpty(stack s) {
+    s->topOfstack = emptyTos;
+}
+void push(elementType x, stack s) {
+    if (!isFull(s)) {
+        s->array[++s->topOfstack] = x;
+    } else {
+        printf("out of space!\n");
+        return;
+}
+}
+elementType top(stack s) {
+    if (!isEmpty(s)) {
+        return s->array[s->topOfstack];
+    }
+    printf("empty stack!\n");
+    return 0;
+}
+void pop(stack s) {
+     if (!isEmpty(s)) {
+        s->topOfstack--;
+    }
+    printf("empty stack!\n");
+    return;
+}
+elementType topAndpop(stack s) {
+    elementType temp;
+    if (!isEmpty(s)) {
+        temp = s->array[s->topOfstack--];
+    return temp;
+    }
+    printf("empty stack!\n");
+    return 0;
+}
+
