@@ -1,0 +1,114 @@
+##queue's array implementation in c
+###author: zerods
+###reference: data and structure in c
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+struct queueRecord;
+typedef struct queueRecord* queue;
+typedef int elementType;
+
+int isEmpty(queue q);
+int isFull(queue q);
+queue createQueue(int maxElements);
+void disposeQueue(queue q);
+void makeEmpty(queue q);
+void enqueue(elementType x, queue q);
+elementType front(queue q);
+void dequeue(queue q);
+elementType frontAndDequeue(queue q);
+
+struct queueRecord{
+    elementType *array;
+    int capacity;
+    int front;
+    int rear;
+    int size;
+};
+int main()
+{
+    int i;
+    queue q;
+    q = createQueue(10);                //create a queue
+    for(i = 0; i<q->capacity;i++)
+        printf("%d ", q->array[i]);
+    printf("\n");
+    for(i = 0; i<q->capacity;i++)
+        enqueue(i+1, q);
+    for(i = 0; i<q->capacity;i++)
+        printf("%d ", q->array[i]);
+    printf("\n");
+    enqueue(1000, q);                   //queue is full, enqueue is not doable
+    for(i = 0; i<q->capacity;i++)
+        dequeue(q);
+    printf("\n");
+    for(i = 0; i<q->capacity;i++)
+        printf("%d ", q->array[i]);
+    printf("\n");
+    dequeue(q);                         //queue is empty, dequeue is not doable
+    printf("%p ", q);
+    disposeQueue(q);
+    return 0;
+}
+
+int isEmpty(queue q) {
+    return q->size == 0;
+}
+int isFull(queue q) {
+    return q->size == q->capacity;
+}
+queue createQueue(int maxElements) {
+    queue q;
+    q = malloc(sizeof(struct queueRecord));
+    if (q == NULL) {
+        printf("out of space!\n");
+        return NULL;
+    }
+    q->array = malloc(sizeof(elementType)*maxElements);
+    if (q->array == NULL) {
+        printf("out of space!\n");
+        return NULL;
+    }
+    q->capacity = maxElements;
+    makeEmpty(q);
+    return q;
+}
+void disposeQueue(queue q) {
+    makeEmpty(q);
+    free(q->array);
+    free(q);
+}
+void makeEmpty(queue q) {
+    q->size = 0;
+    q->front = 0;
+    q->rear = -1;
+}
+void enqueue(elementType x, queue q) {
+    if (isFull(q)) {
+        printf("out of space!\n");
+        return;
+    } else if (q->rear == q->capacity - 1)
+            q->rear = 0;
+    else {
+        q->rear++;
+    }
+    q->array[q->rear] = x;
+    q->size++;
+}
+
+void dequeue(queue q) {
+    if (isEmpty(q)){
+        printf("use createQueue first!\n");
+        return;
+    } else if (q->front == q->capacity - 1) {
+        q->array[q->front] = 0;
+        q->front = 0;
+    } else {
+        q->array[q->front] = 0;
+        q->front++;
+    }
+    q->size--;
+}
+
+```
