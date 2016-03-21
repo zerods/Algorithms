@@ -1,0 +1,99 @@
+#pat  Tree Traversals Again
+An inorder binary tree traversal can be implemented in a non-recursive way with a stack.
+For example, suppose that when a 6-node binary tree (with the keys numbered from 1 to 6) 
+is traversed, the stack operations are: push(1); push(2); push(3); pop(); pop(); push(4);
+pop(); pop(); push(5); push(6); pop(); pop(). Then a unique binary tree can be generated
+from this sequence of operations. Your task is to give the postorder traversal sequence
+of this tree.
+
+
+Figure 1
+Input Specification:
+
+Each input file contains one test case. For each case, the first line contains a positive
+integer N (N<30) which is the total number of nodes in a tree (and hence the nodes are
+numbered from 1 to NN). Then 2N lines follow, each describes a stack operation in the 
+format: "Push X" where X is the index of the node being pushed onto the stack; or "Pop" 
+meaning to pop one node from the stack.
+
+Output Specification:
+
+For each test case, print the postorder traversal sequence of the corresponding tree in one line. 
+A solution is guaranteed to exist. All the numbers must be separated by exactly one space,and 
+there must be no extra space at the end of the line.
+
+Sample Input:
+
+6
+
+Push 1
+
+Push 2
+
+Push 3
+
+Pop
+
+Pop
+
+Push 4
+
+Pop
+
+Pop
+
+Push 5
+
+Push 6
+
+Pop
+
+Pop
+
+Sample Output:
+
+3 4 2 6 5 1
+
+code in python :
+
+```python
+
+#create preorder travesal list and inorder travesal list
+def create_pre_and_in():
+    treeNodeNum = int(raw_input())
+    stack, preOrder, inOrder, postOrder = [], [], [], []
+    for index in range(2 * treeNodeNum):
+        order = raw_input()
+        if order != 'Pop':
+            nodeEle = order.split()[-1]
+            preOrder.append(nodeEle)
+            stack.append(nodeEle)
+        else:
+            inOrder.append(stack.pop(-1))
+        # print preOrder, inOrder
+    return preOrder, inOrder
+    
+#recursion
+def post(preOrder, inOrder):
+    # print preOrder, inOrder
+    if len(preOrder) <= 1:
+        return preOrder
+    else:
+        root = preOrder[0]
+        index = inOrder.index(root)
+        
+        left = post(preOrder[1:index + 1], inOrder[:index])
+        right = post(preOrder[index + 1:], inOrder[index + 1:])
+        return left + right + [root]
+        
+#main procedure        
+def main():
+    preOrder, inOrder = create_pre_and_in()
+    postOrder = post(preOrder, inOrder)
+##    print postOrder
+    length = len(postOrder)
+    for i in range(length - 1):
+        print postOrder[i],
+    print postOrder[-1]
+main()
+```
