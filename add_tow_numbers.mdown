@@ -1,0 +1,97 @@
+#Add Two Numbers leetcode
+Total Accepted: 129831 Total Submissions: 575220 Difficulty: Medium
+You are given two linked lists representing two non-negative numbers. 
+The digits are stored in reverse order and each of their nodes contain a single digit.
+Add the two numbers and return it as a linked list.
+
+Input: (2 -> 4 -> 3) + (5 -> 6 -> 4)
+
+Output: 7 -> 0 -> 8
+```c
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct ListNode {
+     int val;
+     struct ListNode *next;
+ };
+struct ListNode* addTwoNumbers(struct ListNode* l1, struct ListNode* l2);
+void singleLinkedList(struct ListNode* L, struct ListNode* temp, struct ListNode* tail, int carry );
+
+int main(void) {
+    struct ListNode *l1;
+    struct ListNode *l2;
+    struct ListNode *l3;
+    l1 = malloc( sizeof( struct ListNode ) );
+    l2 = malloc( sizeof( struct ListNode ) );
+    l1 -> val = 3;
+    l2 -> val = 9;
+    l1 -> next = malloc( sizeof( struct ListNode ) );
+    l2 -> next = malloc( sizeof( struct ListNode ) );
+    l1 -> next -> val = 7;
+    l2 -> next -> val = 2;
+    l1 -> next -> next = NULL;
+    l2 -> next -> next = NULL;
+    l3 = addTwoNumbers(l1, l2);
+    printf("%d %d\n", l3 -> val, l3 -> next -> val, l3 -> next -> next -> val );
+    return 0;
+}
+
+struct ListNode* addTwoNumbers(struct ListNode* l1, struct ListNode* l2) {
+    struct ListNode *l3;
+    struct ListNode *temp;
+    struct ListNode *tail;
+    int carry = 0;
+
+    if( l1 == NULL && l2 == NULL ) {
+        return NULL;
+    } else if( l1 == NULL ) {
+        return l2;
+    } else if( l2 == NULL ) {
+        return l1;
+    } else {
+        l3 = malloc( sizeof( struct ListNode ) );
+        l3 -> val = -1;
+        l3 -> next = NULL;
+        while ( l1 && l2 ) {
+            temp = malloc( sizeof( struct ListNode ) );
+            if ( l3 -> val == -1 ) {
+                l3 -> val = ( l1 -> val + l2 -> val ) % 10;
+                tail = l3;
+                carry = ( l1 -> val + l2 -> val ) / 10;
+            } else {
+                temp -> val = ( l1 -> val + l2 -> val + carry ) % 10;
+                carry = ( l1 -> val + l2 -> val + carry) / 10;
+                temp -> next = tail -> next;
+                tail -> next = temp;
+                tail = temp;
+            }
+            l1 = l1 -> next;
+            l2 = l2 -> next;
+        }
+        singleLinkedList(l1, temp, tail, carry );
+        singleLinkedList(l2, temp, tail, carry );
+        if ( carry ) {
+            temp = malloc( sizeof( struct ListNode ) );
+            temp -> val = 1;
+            carry = 0;
+            temp -> next = tail -> next;
+            tail -> next = temp;
+            tail = temp;
+        }
+        return l3;
+    }
+}
+void singleLinkedList(struct ListNode* L, struct ListNode* temp, struct ListNode* tail, int carry ) {
+    while ( L ) {
+            temp = malloc( sizeof( struct ListNode ) );
+            temp -> val = ( L -> val + carry ) % 10;
+            carry = ( L -> val + carry) / 10;
+            temp -> next = tail -> next;
+            tail -> next = temp;
+            tail = temp;
+            L = L -> next;
+        }
+}
+```
