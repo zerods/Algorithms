@@ -1,0 +1,180 @@
+###是否属于同一棵二叉搜索树 
+给定一个插入序列就可以唯一确定一棵二叉搜索树。然而，一棵给定的二叉搜索树却可以由多种不同的插入序列得到。
+例如分别按照序列{2, 1, 3}和{2, 3, 1}插入初始为空的二叉搜索树，都得到一样的结果。于是对于输入的各种插入
+序列，你需要判断它们是否能生成一样的二叉搜索树。
+
+输入格式:
+
+输入包含若干组测试数据。每组数据的第1行给出两个正整数N ≤10和L，分别是每个序列插入元素的个数和
+需要检查的序列个数。第2行给出N个以空格分隔的正整数，作为初始插入序列。最后L行，每行给出N个插入的元素，
+属于L个需要检查的序列。
+
+简单起见，我们保证每个插入序列都是1到N的一个排列。当读到N为0时，标志输入结束，这组数据不要处理。
+
+输出格式:
+
+对每一组需要检查的序列，如果其生成的二叉搜索树跟对应的初始序列生成的一样，输出“Yes”，否则输出“No”。
+
+输入样例:
+
+4 2
+
+3 1 4 2
+
+3 4 1 2
+
+3 2 4 1
+
+2 1
+
+2 1
+
+1 2
+
+0
+
+输出样例:
+
+Yes
+
+No
+
+No
+```c
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct TreeNode*Tree;
+struct TreeNode {
+    int key;
+    Tree left, right;
+    int flag;
+};
+
+Tree makeTree(int length);
+Tree newNode(int key);
+int judge(Tree T, int length);
+void reset(Tree T);
+Tree freeTree(Tree T);
+Tree insert(Tree T, int key);
+
+int main(int argc, char* argv[]) {
+    int length, num, i;
+    Tree newTree;
+
+    scanf("%d", &length);
+    while(length) {
+        scanf("%d", &num);
+        newTree = makeTree(length);
+        for(i=0; i<num; i++) {
+            if(judge(newTree, length)) {
+                printf("Yes\n");
+            } else {
+                printf("No\n");
+            }
+        }
+        freeTree(newTree);
+        scanf("%d", &length);
+    }
+
+    return 0;
+}
+/*create new node*/
+Tree newNode(int key) {
+    Tree T  = malloc(sizeof(struct TreeNode));
+
+    T -> key = key;
+    T -> left = T -> right = NULL;
+    T -> flag = 0;
+
+    return T;
+}
+
+Tree makeTree(int length) {
+    Tree T, tmp;
+    int i, key;
+
+    scanf("%d", &key);
+    T = newNode(key);
+    tmp = T;
+    for(i=1; i<length; i++) {
+        scanf("%d", &key);
+        tmp = insert(tmp, key);
+    }
+    tmp = NULL;
+
+    return T;
+}
+
+Tree insert(Tree T, int key) {
+    if (T == NULL) {
+        T = newNode(key);
+    } else if (key > T -> key) {
+        T -> right = insert(T -> right, key);
+    } else {
+        T -> left = insert(T -> left, key);
+    }
+
+    return T;
+}
+
+/*based on the path by which a key seach the tree, if all keys are found without 
+passing other keys, then they are the same bst*/
+
+int judge(Tree T, int length) {
+    int i, key, flag = 1;
+    Tree tmp;
+
+    for(i=0; i<length; i++) {
+        scanf("%d", &key);
+        tmp = T;
+        if (tmp -> key == key) {
+            tmp -> flag = 1;
+        } else {
+            while (tmp -> key != key && tmp -> flag) {
+                if (tmp -> key > key) {
+                    tmp = tmp -> left;
+                } else {
+                    tmp = tmp -> right;
+                }
+            }
+            if (tmp -> key != key && tmp -> flag == 0) {
+                flag = 0;
+            } else if (tmp -> key == key) {
+                tmp -> flag = 1;
+            }
+        }
+    }
+    reset(T);
+
+    return flag;
+}
+
+void reset(Tree T) {
+    if (T == NULL) {
+        return;
+    } else if (T -> left == NULL && T -> right == NULL) {
+        T -> flag = 0;
+    } else {
+        reset(T -> left);
+        reset(T -> right);
+        T -> flag = 0;
+    }
+}
+
+Tree freeTree(Tree T) {
+    if (T == NULL) {
+        return T;
+    } else if (T -> left == NULL && T -> right == NULL) {
+        T = NULL;
+    } else {
+        T -> left = freeTree(T -> left);
+        T -> right = freeTree(T -> right);
+        T = NULL;
+    }
+
+    return T;
+}
+
+```
