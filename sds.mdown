@@ -1,0 +1,183 @@
+```c
+//计算六层以内的节点数
+#include <stdio.h>
+#include <stdlib.h>
+typedef int Vertex;
+typedef Vertex ElementType;
+typedef struct queueNode *ptrToQueueNode;
+struct queueNode {
+    ElementType queueEle;
+    ptrToQueueNode next;
+};
+
+typedef struct QNode* Queue;
+struct QNode {
+    ptrToQueueNode head;
+    ptrToQueueNode tail;
+};
+Queue CreateQueue() {
+    Queue Q = (Queue)malloc(sizeof(struct QNode));
+    Q->head = malloc(sizeof(struct queueNode));
+    Q->tail = Q->head;
+    Q->tail->next = NULL;
+    return Q;
+}
+
+int IsEmpty(Queue Q) {
+    return Q->head == Q->tail;
+}
+
+ElementType Dequeue(Queue Q) {
+    ptrToQueueNode tmp;
+    int value;
+    if(IsEmpty(Q))
+        return -1;
+    tmp = Q->head->next;
+    Q->head->next = tmp->next;
+    value = tmp->queueEle;
+    if(Q->tail == tmp)
+        Q->tail = Q->head;
+    free(tmp);
+
+    return value;
+}
+void Enqueue(ElementType V, Queue Q) {
+    ptrToQueueNode NewQueueNode;
+    NewQueueNode = (ptrToQueueNode)malloc(sizeof(struct queueNode));
+    NewQueueNode->queueEle = V;
+
+    NewQueueNode->next = NULL;
+    Q->tail->next = NewQueueNode;
+    Q->tail = NewQueueNode;
+}
+
+
+#define MaxVertexNum 10001
+typedef int Vertex;
+typedef struct ENode *Edge;
+struct ENode {
+    Vertex V1;
+    Vertex V2;
+};
+
+typedef struct AdjVNode *ptrToAdjVNode;
+struct AdjVNode {
+    Vertex name;
+    ptrToAdjVNode next;
+};
+
+typedef struct Vnode {
+    ptrToAdjVNode firstEdge;
+}AdjList[MaxVertexNum];
+
+typedef struct GNode *ptrToGNode;
+struct GNode {
+    int nv;
+    int ne;
+    AdjList G;
+};
+typedef ptrToGNode LGraph;
+
+LGraph CreateGraph( int VertexNum ) {
+    Vertex V;
+    LGraph Graph;
+
+    Graph = (LGraph)malloc(sizeof(struct GNode));
+    Graph->nv = VertexNum;
+    Graph->ne = 0;
+
+    for(V=0; V<Graph->nv; V++) {
+        Graph->G[V].firstEdge = NULL;
+    }
+
+    return Graph;
+}
+
+void InsertEdge( LGraph Graph, Edge E ) {
+    ptrToAdjVNode NewNode;
+    NewNode = (ptrToAdjVNode)malloc(sizeof(struct AdjVNode));
+    NewNode->name = E->V2;
+    NewNode->next = Graph->G[E->V1].firstEdge;
+    Graph->G[E->V1].firstEdge = NewNode;
+
+    NewNode = (ptrToAdjVNode)malloc(sizeof(struct AdjVNode));
+    NewNode->name = E->V1;
+    NewNode->next = Graph->G[E->V2].firstEdge;
+    Graph->G[E->V2].firstEdge = NewNode;
+}
+
+LGraph BuildGraph(void){
+    LGraph Graph;
+    Edge E;
+    int nv, i;
+    ptrToAdjVNode W;
+
+    scanf("%d", &nv);
+    Graph = CreateGraph(nv);
+    scanf("%d", &Graph->ne);
+    if (Graph->ne != 0) {
+        E = (Edge)malloc(sizeof(struct ENode));
+        for(i=0; i<Graph->ne; i++) {
+            scanf("%d %d", &E->V1, &E->V2);
+            InsertEdge(Graph, E);
+        }
+    }
+    for(i=0; i<Graph->nv; i++) {
+        printf("%d ", i+1);
+        for(W=Graph->G[i].firstEdge; W; W=W->next )
+            printf("%d ", W->name);
+        printf("\n");
+    }
+    return Graph;
+
+}
+int Visited[MaxVertexNum] = {0};
+
+int Bfs(LGraph Graph, Vertex V) {
+    Visited[V] = 1;
+    int count = 1;
+    int level = 0;
+    int last = V;
+    ptrToAdjVNode W;
+    Queue Q = CreateQueue();
+    int tail = 0;
+
+    Enqueue(V, Q);
+    while (!IsEmpty(Q)) {
+        V = Dequeue(Q);
+        for(W=Graph->G[V].firstEdge; W; W=W->next ) {
+            if (!Visited[W -> name]) {
+                Visited[W -> name] = 1;
+                Enqueue(W->name, Q);
+                count++;
+                tail = W->name;  /*tail是下一层进队列的最后一个节点*/
+            }
+        }
+        if (V == last) {
+            level++;
+            last = tail;
+        }
+        if (level == 6)
+            break;
+    }
+
+    return count;
+}
+
+
+void sds(void) {
+    int V, count;
+    LGraph Graph = BuildGraph();
+    for (V=0; V<Graph->nv; V++) {
+        count = Bfs(Graph, V);
+        printf("%d: %f\n", V + 1, 1.0 * count / Graph->nv );
+    }
+}
+
+int main() {
+    sds();
+    return 0;
+}
+
+
+```
