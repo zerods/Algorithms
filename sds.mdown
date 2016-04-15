@@ -1,5 +1,4 @@
 ```c
-//计算六层以内的节点数
 #include <stdio.h>
 #include <stdlib.h>
 typedef int Vertex;
@@ -94,16 +93,16 @@ LGraph CreateGraph( int VertexNum ) {
 }
 
 void InsertEdge( LGraph Graph, Edge E ) {
-    ptrToAdjVNode NewNode;
-    NewNode = (ptrToAdjVNode)malloc(sizeof(struct AdjVNode));
-    NewNode->name = E->V2;
-    NewNode->next = Graph->G[E->V1].firstEdge;
-    Graph->G[E->V1].firstEdge = NewNode;
+    ptrToAdjVNode NewNode1, NewNode2;
+    NewNode1 = (ptrToAdjVNode)malloc(sizeof(struct AdjVNode));
+    NewNode1->name = E->V2;
+    NewNode1->next = Graph->G[E->V1].firstEdge;
+    Graph->G[E->V1].firstEdge = NewNode1;
 
-    NewNode = (ptrToAdjVNode)malloc(sizeof(struct AdjVNode));
-    NewNode->name = E->V1;
-    NewNode->next = Graph->G[E->V2].firstEdge;
-    Graph->G[E->V2].firstEdge = NewNode;
+    NewNode2 = (ptrToAdjVNode)malloc(sizeof(struct AdjVNode));
+    NewNode2->name = E->V1;
+    NewNode2->next = Graph->G[E->V2].firstEdge;
+    Graph->G[E->V2].firstEdge = NewNode2;
 }
 
 LGraph BuildGraph(void){
@@ -122,15 +121,16 @@ LGraph BuildGraph(void){
             InsertEdge(Graph, E);
         }
     }
-    for(i=0; i<Graph->nv; i++) {
-        printf("%d ", i+1);
-        for(W=Graph->G[i].firstEdge; W; W=W->next )
-            printf("%d ", W->name);
-        printf("\n");
-    }
+//    for(i=1; i<=Graph->nv; i++) {
+//        printf("%d ", i);
+//        for(W=Graph->G[i].firstEdge; W; W=W->next )
+//            printf("%d ", W->name);
+//        printf("\n");
+//    }
     return Graph;
 
 }
+
 int Visited[MaxVertexNum] = {0};
 
 int Bfs(LGraph Graph, Vertex V) {
@@ -166,11 +166,14 @@ int Bfs(LGraph Graph, Vertex V) {
 
 
 void sds(void) {
-    int V, count;
+    int V, count, i;
     LGraph Graph = BuildGraph();
-    for (V=0; V<Graph->nv; V++) {
+    for (V=1; V<=Graph->nv; V++) {
         count = Bfs(Graph, V);
-        printf("%d: %f\n", V + 1, 1.0 * count / Graph->nv );
+        printf("%d: %.2f%%\n", V, 100.0 * count / Graph->nv );
+        for(i=1; i<=Graph->nv; i++){
+            Visited[i] = 0;
+        }
     }
 }
 
