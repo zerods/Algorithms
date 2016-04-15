@@ -1,0 +1,158 @@
+###Saving James Bond - Easy Version 
+This time let us consider the situation in the movie "Live and Let Die" in which James Bond,
+the world's most famous spy, was captured by a group of drug dealers.He was sent to a small
+piece of land at the center of a lake filled with crocodiles. There he performed the most
+daring action to escape -- he jumped onto the head of the nearest crocodile! Before the
+animal realized what was happening, James jumped again onto the next big head...Finally 
+he reached the bank before the last crocodile could bite him (actually the stunt man was
+caught by the big mouth and barely escaped with his extra thick boot).
+
+Assume that the lake is a 100 by 100 square one. Assume that the center of the lake is 
+at (0,0) and the northeast corner at (50,50). The central island is a disk centered at (0,0)
+with the diameter of 15. A number of crocodiles are in the lake at various positions. 
+Given the coordinates of each crocodile and the distance that James could jump, you must tell
+him whether or not he can escape.
+
+Input Specification:
+
+Each input file contains one test case. Each case starts with a line containing two positive
+integers N(N ≤100), the number of crocodiles,and D, the maximum distance that James could jump.
+Then NN lines follow, each containing the (x, y)(x,y) location of a crocodile. 
+Note that no two crocodiles are staying at the same position.
+
+Output Specification:
+
+For each test case, print in a line "Yes" if James can escape, or "No" if not.
+
+Sample Input 1:
+
+14 20
+
+25 -15
+
+-25 28
+
+8 49
+
+29 15
+
+-35 -2
+
+5 28
+
+27 -29
+
+-8 -28
+
+-20 -35
+
+-25 -20
+
+-13 29
+
+-30 15
+
+-35 40
+
+12 12
+
+Sample Output 1:
+
+Yes
+
+Sample Input 2:
+
+4 13
+
+-12 12
+
+12 12
+
+-12 -12
+
+12 -12
+
+Sample Output 2:
+
+No
+```c
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#define NO 0
+#define YES 1
+#define cornerDis 50.0
+#define diameter 15.0
+struct pos{
+    float x;
+    float y;
+};
+
+void Save007(void);  
+int Dfs(int V);      
+int FirstJump(int V); 
+int Jump(int V, int W); 
+int IsSafe(int V);      
+
+struct pos *Crocodile;
+int N;
+float jumpDis;
+int visited[101] = {0};  
+
+int main(){
+    int i;
+    scanf("%d %f", &N, &jumpDis);
+    Crocodile = malloc(sizeof(struct pos) * (N + 1));
+    Crocodile[0].x = 0.0;
+    Crocodile[0].y = 0.0;
+    for(i = 1; i <= N; i++) {
+        scanf("%f %f", &Crocodile[i].x, &Crocodile[i].y);
+    }
+    Save007();
+
+    return 0;
+}
+
+void Save007() {
+    int V, ans = NO;
+    for(V = 0; V <= N ;V++) {
+        if (!visited[V] && FirstJump(V)) {
+            ans = Dfs(V);
+            if (ans == YES) break;
+        }
+    }
+    if (ans == YES) printf("Yes");
+    else printf("No");
+}
+
+int Dfs(int V) {
+    visited[V] = 1;
+    int W, ans = NO;
+    if (IsSafe(V)) ans = YES;
+    else {
+        for (W = 0; W <= N; W++) {
+            if ( !visited[W] && Jump(V, W)) {
+                ans = Dfs(W);
+                if (ans == YES) break;
+            }
+        }
+    }
+    return ans;
+}
+
+int IsSafe(int V) {
+    return fabs(Crocodile[V].x) + jumpDis >= cornerDis || fabs(Crocodile[V].y) + jumpDis >= cornerDis;
+}
+
+int FirstJump(int V) {
+    return sqrt(Crocodile[V].x * Crocodile[V].x + Crocodile[V].y * Crocodile[V].y) <= jumpDis + diameter / 2;
+}
+
+int Jump(int V, int W) {
+    int x = Crocodile[V].x - Crocodile[W].x;
+    int y = Crocodile[V].y - Crocodile[W].y;
+    return sqrt( x * x + y * y) <= jumpDis;
+}
+
+```
