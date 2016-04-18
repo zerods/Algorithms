@@ -1,0 +1,293 @@
+###图5 Saving James Bond - Hard Version 
+This time let us consider the situation in the movie "Live and Let Die" in which James Bond, the world's most
+famous spy, was captured by a group of drug dealers. He was sent to a small piece of land at the center of a 
+lake filled with crocodiles. There he performed the most daring action to escape -- he jumped onto the head of
+the nearest crocodile! Before the animal realized what was happening, James jumped again onto the next big head
+... Finally he reached the bank before the last crocodile could bite him (actually the stunt man was caught by
+the big mouth and barely escaped with his extra thick boot).
+
+Assume that the lake is a 100 by 100 square one. Assume that the center of the lake is at (0,0) and the northeast
+corner at (50,50). The central island is a disk centered at (0,0) with the diameter of 15. A number of crocodiles
+are in the lake at various positions. Given the coordinates of each crocodile and the distance that James could 
+jump, you must tell him a shortest path to reach one of the banks. The length of a path is the number of jumps that
+James has to make.
+
+Input Specification:
+
+Each input file contains one test case. Each case starts with a line containing two positive integers N≤100, the
+number of crocodiles, and DD, the maximum distance that James could jump. Then N lines follow, each containing the
+(x, y) location of a crocodile. Note that no two crocodiles are staying at the same position.
+
+####Output Specification:
+
+For each test case, if James can escape, output in one line the minimum number of jumps he must make. Then starting
+from the next line, output the position (x, y) of each crocodile on the path, each pair in one line, from the 
+island to the bank. If it is impossible for James to escape that way, simply give him 0 as the number of jumps. If
+there are many shortest paths, just output the one with the minimum first jump, which is guaranteed to be unique.
+
+####Sample Input 1:
+
+17 15
+
+10 -21
+
+10 21
+
+-40 10
+
+30 -50
+
+20 40
+
+35 10
+
+0 -10
+
+-25 22
+
+40 -40
+
+-30 30
+
+-10 22
+
+0 11
+
+25 21
+
+25 10
+
+10 10
+
+10 35
+
+-30 10
+
+####Sample Output 1:
+
+4
+
+0 11
+
+10 21
+
+10 35
+
+####Sample Input 2:
+
+4 13
+
+-12 12
+
+12 12
+
+-12 -12
+
+12 -12
+
+####Sample Output 2:
+
+0
+```c
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#define cornerDis 50.0
+#define diameter 15.0
+#define MaxVertexNum 101
+#define Infinity 65535
+
+/*这里的queue随便写的,有一些问题*/
+typedef int Vertex;
+typedef Vertex ElementType;
+
+typedef struct queueNode *ptrToQueueNode;
+struct queueNode {
+    ElementType queueEle;
+    ptrToQueueNode next;
+};
+
+typedef struct QNode* Queue;
+struct QNode {
+    ptrToQueueNode head;
+    ptrToQueueNode tail;
+};
+Queue CreateQueue() {
+    Queue Q = (Queue)malloc(sizeof(struct QNode));
+    Q->head = malloc(sizeof(struct queueNode));
+    Q->tail = Q->head;
+    Q->tail->next = NULL;
+    return Q;
+}
+
+int IsEmpty(Queue Q) {
+    return Q->head == Q->tail;
+}
+
+ElementType Dequeue(Queue Q) {
+    ptrToQueueNode tmp;
+    int value;
+    if(IsEmpty(Q))
+        return -1;
+    tmp = Q->head->next;
+    Q->head->next = tmp->next;
+    value = tmp->queueEle;
+    if(Q->tail == tmp)
+        Q->tail = Q->head;
+    free(tmp);
+
+    return value;
+}
+void Enqueue(ElementType V, Queue Q) {
+    ptrToQueueNode NewQueueNode;
+    NewQueueNode = (ptrToQueueNode)malloc(sizeof(struct queueNode));
+    NewQueueNode->queueEle = V;
+
+    NewQueueNode->next = NULL;
+    Q->tail->next = NewQueueNode;
+    Q->tail = NewQueueNode;
+}
+
+struct pos{
+    int x;
+    int y;
+};
+struct tableEntry {
+    int Dist;
+    Vertex Path;
+};
+struct tableEntry* T;
+struct pos* Crocodile;
+int N;
+float jumpDis;
+
+int FirstJump(int V); //第一跳判断
+int Jump(int V, int W); //两只鳄鱼之间的距离判断
+int IsSafe(int V);      //到达某个鳄鱼头后，判断是否能跳到岸上
+void Unweighted(int VertexNum);
+void printPath(Vertex V);
+void InitTable(Vertex start);
+float FirstJumpDis(int V);
+Vertex FirstJumpCro(int V);
+
+int main(int argc, char*argv[]) {
+    freopen("test.txt", "r", stdin);
+    int i, shortest, endCro;
+
+    scanf("%d %f", &N, &jumpDis);
+    if (jumpDis + diameter / 2>= 50) {
+        printf("1");
+        return 0;
+    }
+    Crocodile = malloc(sizeof(struct pos) * (N + 1));       /*初始化鳄鱼坐标数组*/
+    Crocodile[0].x = 0;                                     /*原点*/
+    Crocodile[0].y = 0;
+    for(i = 1; i <= N; i++) {
+        scanf("%d %d", &Crocodile[i].x, &Crocodile[i].y);
+    }
+
+    T = malloc(sizeof(struct tableEntry)*MaxVertexNum);     /*由path和dist值组成的数组, 初始化*/
+    InitTable(0);
+    Unweighted(N);                                          /*无权最短路算法*/
+
+    shortest = Infinity;
+    endCro = 0;
+
+    for(i=1; i<=N; i++) {                                   /*判断需要最小路径且可以安全到岸边的路径的最后鳄鱼*/
+        if (T[i].Dist < shortest && IsSafe(i)) {
+            shortest = T[i].Dist;
+            endCro = i;
+        } else if (T[i].Dist == shortest && IsSafe(i)){
+            if (FirstJumpDis(FirstJumpCro(i)) < FirstJumpDis(FirstJumpCro(endCro)))
+                endCro = i;
+        }
+    }
+    if ((endCro == 0 && IsSafe(0)) || endCro) {
+        printf("%d", T[endCro].Dist + 1);
+    } else {
+        printf("0");
+    }
+    if (endCro)
+        printPath(endCro);
+
+    return 0;
+}
+
+int IsSafe(int V) {
+    return fabs(1.0*Crocodile[V].x) + jumpDis >= cornerDis || fabs(1.0*Crocodile[V].y) + jumpDis >= cornerDis;
+}
+
+int FirstJump(int V) {
+    return sqrt(1.0*Crocodile[V].x * Crocodile[V].x + 1.0*Crocodile[V].y * Crocodile[V].y) <= jumpDis + diameter / 2;
+}
+
+float FirstJumpDis(int V) {
+    return sqrt(1.0*Crocodile[V].x * Crocodile[V].x + 1.0*Crocodile[V].y * Crocodile[V].y);
+}
+
+Vertex FirstJumpCro(int V) {
+    if (T[V].Dist == 1)
+        return V;
+    else {
+        return FirstJumpCro(T[V].Path);
+    }
+}
+int Jump(int V, int W) {
+    int x = Crocodile[V].x - Crocodile[W].x;
+    int y = Crocodile[V].y - Crocodile[W].y;
+    return sqrt( 1.0*x * x + 1.0*y * y) <= jumpDis;
+}
+
+void InitTable(Vertex start) {
+    int i;
+
+    for(i=0; i<MaxVertexNum; i++) {
+        T[i].Dist = Infinity;
+        T[i].Path = -1;
+    }
+    T[start].Dist = 0;
+}
+
+void Unweighted(int VertexNum) {
+    Queue Q;
+    Vertex V, W;
+
+    Q = CreateQueue();
+    Enqueue(0, Q);
+    while (!IsEmpty(Q)) {
+        V = Dequeue(Q);
+        for(W=0; W<=VertexNum; W++) {
+            if (V==0) {
+                if(FirstJump(W) && T[W].Dist==Infinity) {
+                    T[W].Dist = T[V].Dist + 1;
+                    T[W].Path = V;
+                    Enqueue(W, Q);
+                }
+            } else {
+                if(Jump(V, W) && T[W].Dist==Infinity) {
+                    T[W].Dist = T[V].Dist + 1;
+                    T[W].Path = V;
+                    Enqueue(W, Q);
+                }
+            }
+        }
+    }
+}
+
+void printPath(Vertex V) {
+    if (T[V].Path != -1) {
+        printPath(T[V].Path);
+    }
+    if (V)
+        printf("\n%d %d", Crocodile[V].x, Crocodile[V].y);
+}
+
+```
+
+
+
+
+
+
+
+
