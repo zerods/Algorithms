@@ -1,0 +1,179 @@
+###07-图4 哈利·波特的考试   (25分)
+哈利·波特要考试了，他需要你的帮助。这门课学的是用魔咒将一种动物变成另一种动物的本事。例如将猫变成老鼠的魔咒是haha，
+将老鼠变成鱼的魔咒是hehe等等。反方向变化的魔咒就是简单地将原来的魔咒倒过来念，例如ahah可以将老鼠变成猫。另外，如果
+想把猫变成鱼，可以通过念一个直接魔咒lalala，也可以将猫变老鼠、老鼠变鱼的魔咒连起来念：hahahehe。
+
+现在哈利·波特的手里有一本教材，里面列出了所有的变形魔咒和能变的动物。老师允许他自己带一只动物去考场，要考察他把这只
+动物变成任意一只指定动物的本事。于是他来问你：带什么动物去可以让最难变的那种动物（即该动物变为哈利·波特自己带去的动
+物所需要的魔咒最长）需要的魔咒最短？例如：如果只有猫、鼠、鱼，则显然哈利·波特应该带鼠去，因为鼠变成另外两种动物都只
+需要念4个字符；而如果带猫去，则至少需要念6个字符才能把猫变成鱼；同理，带鱼去也不是最好的选择。
+
+####输入格式:
+
+输入说明：输入第1行给出两个正整数N≤100和M，其中N是考试涉及的动物总数，M是用于直接变形的魔咒条数。为简单起见，我们将
+动物按1~N编号。随后M行，每行给出了3个正整数，分别是两种动物的编号、以及它们之间变形需要的魔咒的长度(≤100)，数字之
+间用空格分隔。
+
+####输出格式:
+
+输出哈利·波特应该带去考场的动物的编号、以及最长的变形魔咒的长度，中间以空格分隔。如果只带1只动物是不可能完成所有变
+形要求的，则输出0。如果有若干只动物都可以备选，则输出编号最小的那只。
+
+####输入样例:
+
+6 11
+
+3 4 70
+
+1 2 1
+
+5 4 50
+
+2 6 50
+
+5 6 60
+
+1 3 70
+
+4 6 60
+
+3 6 80
+
+5 1 100
+
+2 4 60
+
+5 2 80
+
+####输出样例:
+
+4 70
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+#define false 0
+#define true 1
+#define MaxVertexNum 101    /* 最大顶点数设为100 */
+#define INFINITY 65535        /* ∞设为双字节无符号整数的最大值65535*/
+typedef int Vertex;         /* 用顶点下标表示顶点,为整型 */
+typedef int WeightType;        /* 边的权值设为整型 */
+//typedef char DataType;        /* 顶点存储的数据类型设为字符型 */
+typedef int bool;
+
+/* 边的定义 */
+typedef struct ENode *PtrToENode;
+struct ENode {
+    Vertex V1, V2;      /* 有向边<V1, V2> */
+    WeightType Weight;  /* 权重 */
+};
+typedef PtrToENode Edge;
+
+/* 图结点的定义 */
+typedef struct GNode *PtrToGNode;
+struct GNode {
+    int Nv;  /* 顶点数 */
+    int Ne;  /* 边数   */
+    WeightType G[MaxVertexNum][MaxVertexNum]; /* 邻接矩阵 */
+    //DataType Data[MaxVertexNum];      /* 存顶点的数据 */
+    /* 注意：很多情况下，顶点无数据，此时Data[]可以不用出现 */
+};
+typedef PtrToGNode MGraph; /* 以邻接矩阵存储的图类型 */
+
+MGraph CreateGraph ( int VertexNum ) { /* 初始化一个有VertexNum个顶点但没有边的图 */
+    Vertex V, W;
+    MGraph Graph;
+
+    Graph = (MGraph)malloc(sizeof(struct GNode)); /* 建立图 */
+    Graph->Nv = VertexNum;
+    Graph->Ne = 0;
+    /* 初始化邻接矩阵 */
+    for (V=1; V<=Graph->Nv; V++)
+        for (W=1; W<=Graph->Nv; W++)
+            Graph->G[V][W] = INFINITY;
+
+    return Graph;
+}
+
+void InsertEdge( MGraph Graph, Edge E ) {
+     /* 插入边 <V1, V2> */
+     Graph->G[E->V1][E->V2] = E->Weight;
+     Graph->G[E->V2][E->V1] = E->Weight;
+
+}
+
+bool Floyd( MGraph Graph, WeightType D[][MaxVertexNum], Vertex path[][MaxVertexNum] ) {
+    Vertex i, j, k;
+
+    /* 初始化 */
+    for ( i=1; i<=Graph->Nv; i++ )
+        for( j=1; j<=Graph->Nv; j++ ) {
+            D[i][j] = Graph->G[i][j];
+            //path[i][j] = -1;
+        }
+
+    for( k=1; k<=Graph->Nv; k++ )
+        for( i=1; i<=Graph->Nv; i++ )
+            for( j=1; j<=Graph->Nv; j++ )
+                if( D[i][k] + D[k][j] < D[i][j] ) {
+                    D[i][j] = D[i][k] + D[k][j];
+                    if ( i==j && D[i][j]<0 ) /* 若发现负值圈 */
+                        return false; /* 不能正确解决，返回错误标记 */
+                    //path[i][j] = k;
+                }
+    return true; /* 算法执行完毕，返回正确标记 */
+}
+
+int main(int argc, char* argv[]) {
+    //freopen("test.txt","r",stdin);
+    int animalNum, edgeNum, i, j;
+    int minMax = INFINITY;
+    int bestAnimal = 0;
+    Edge E;
+
+    scanf("%d %d", &animalNum, &edgeNum);
+    MGraph Graph = CreateGraph(animalNum);
+    Graph->Ne = edgeNum;
+    /*建立图*/
+    for( i=0; i<Graph->Ne; i++ ) {
+        E = (Edge)malloc(sizeof(struct ENode));
+        scanf("%d %d %d", &E->V1, &E->V2, &E->Weight);
+        InsertEdge(Graph, E);
+    }
+    WeightType D[MaxVertexNum][MaxVertexNum];
+    Vertex path[MaxVertexNum][MaxVertexNum];
+    int bestCurse[MaxVertexNum];
+    for( i=1; i<=Graph->Nv; i++ ) {
+        bestCurse[i] = 0;
+    }
+    /*找出每个顶点的最长距离*/
+    if (Floyd( Graph, D, path)) {
+        for( i=1; i<=Graph->Nv; i++ ) {
+            for( j=1; j<=Graph->Nv; j++ ) {
+                if ( D[i][j] > bestCurse[i] && i != j ) {
+                    bestCurse[i] = D[i][j];
+                }
+            }
+            //printf("最远路程%d是%d\n", i, bestCurse[i]);
+        }
+    }
+//    for( i=1; i<=Graph->Nv; i++ ) {
+//        for( j=1; j<=Graph->Nv; j++ )
+//            printf("%d ", D[i][j]);
+//        printf("\n");
+//    }
+    for( i=1; i<=Graph->Nv; i++) {
+        if ( bestCurse[i] < minMax ) {
+            bestAnimal = i;
+            minMax = bestCurse[i];
+        }
+    }
+    if (minMax != INFINITY)
+        printf("%d %d\n", bestAnimal, minMax);
+    else
+        printf("0\n");
+
+    return 0;
+
+}
+```
